@@ -3,14 +3,40 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-static inline void outb(uint16_t port, uint8_t val) {
-  asm volatile("outb %0, %1" : : "a"(val), "Nd"(port));
+static inline unsigned char inb(unsigned short port) {
+  unsigned char result;
+  __asm__ volatile("inb %1, %0" : "=a"(result) : "dN"(port));
+  return result;
 }
 
-static inline uint8_t inb(uint16_t port) {
-  uint8_t value;
-  asm volatile("inb %1, %0" : "=a"(value) : "Nd"(port));
-  return value;
+static inline void outb(unsigned short port, unsigned char data) {
+  __asm__ volatile("outb %0, %1" : : "a"(data), "dN"(port));
+}
+
+// Read 16 bits from an I/O port
+static inline unsigned short inw(unsigned short port) {
+  unsigned short result;
+  __asm__ volatile("inw %1, %0"
+                   : "=a"(result) // wynik w rejestrze AX
+                   : "dN"(port)); // port w DX
+  return result;
+}
+
+// Write 16 bits to an I/O port
+static inline void outw(unsigned short port, unsigned short data) {
+  __asm__ volatile("outw %0, %1"
+                   :
+                   : "a"(data), "dN"(port)); // dane w AX, port w DX
+}
+
+static inline unsigned int inl(unsigned short port) {
+  unsigned int result;
+  __asm__ volatile("inl %1, %0" : "=a"(result) : "dN"(port));
+  return result;
+}
+
+static inline void outl(unsigned short port, unsigned int data) {
+  __asm__ volatile("outl %0, %1" : : "a"(data), "dN"(port));
 }
 
 uint8_t read_scancode() {

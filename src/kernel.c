@@ -1,10 +1,8 @@
 #include "debug.c"
-#include "read_sector.c"
 #include "helpers.c"
+#include "disk.c"
 #include "split.c"
 #include "term.c"
-
-uint8_t disk_buffer[512 * 4] __attribute__((section(".lowmem"), aligned(16)));
 
 void kernel_main(void) {
   terminal_initialize();
@@ -32,7 +30,8 @@ void kernel_main(void) {
       continue;
     }
 
-    terminal_writestring("Logged in! You can run \"help\" command for commands\n");
+    terminal_writestring(
+        "Logged in! You can run \"help\" command for commands\n");
     break;
   }
 
@@ -58,25 +57,17 @@ void kernel_main(void) {
         }
       } else if (strcmp(cmd, "clear") == 0 || strcmp(cmd, "cls") == 0) {
         terminal_clear();
-      }else if (strcmp(cmd, "help") == 0) {
-        terminal_writestring("All commands in NickOS:\nhelp - shows all commands\nclear - clears terminal\ncls - alias for clear\necho <text> - prints text given in <text> argument\n");
+      } else if (strcmp(cmd, "help") == 0) {
+        terminal_writestring(
+            "All commands in NickOS:\nhelp - shows all commands\nclear - "
+            "clears terminal\ncls - alias for clear\necho <text> - prints text "
+            "given in <text> argument\n");
+      } else if (strcmp(cmd, "dbgdisk") == 0) {
+        uint16_t sector[256];
+
+        // Teraz `sector` zawiera pierwszy sektor (512 bajtów),
+        // np. MBR, boot sector itp.
       }
-       /*else if (strcmp(cmd, "dbgdisk") == 0) {
-        debug_pointer(disk_buffer);
-        terminal_writestring("Debugging Disk\n");
-          DebugWriteString("Debuging Disk\n");
-
-        read_sector_c(0, 0, 1, 0x80, disk_buffer);
-          DebugWriteString("xd");
-
-        for (size_t i = 0; i < 512; i++) {
-          char out[4];
-          itoa_bare(out, sizeof(out), disk_buffer[i], 16);
-          DebugWriteString(out);
-        }
-        terminal_writestring("\nDisk Debugged\n");
-          DebugWriteString("Disk Debugged\n");
-      }*/
       // else{
       //   terminal_writestring("Command not found!\n");
       // }
