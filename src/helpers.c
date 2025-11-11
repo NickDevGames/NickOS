@@ -127,3 +127,29 @@ uint16_t swap_endian16(uint16_t val) { return (val << 8) | (val >> 8); }
 //     ret[i] = (val[i] << 8) | (val[i] >> 8);
 //   return (uint8_t *)ret;
 // }
+
+void join_args(char **args, int count, char *out, size_t out_size) {
+  if (count <= 1 || out_size == 0)
+    return;
+
+  char *p = out;                   // wskaźnik na bieżące miejsce w buforze
+  size_t remaining = out_size - 1; // zostaw miejsce na '\0'
+
+  for (int i = 1; i < count && remaining > 0; i++) {
+    char *s = args[i]; // aktualny argument
+
+    // kopiuj znak po znaku
+    while (*s && remaining > 0) {
+      *p++ = *s++;
+      remaining--;
+    }
+
+    // dodaj spację, jeśli nie ostatni
+    if (i < count - 1 && remaining > 0) {
+      *p++ = ' ';
+      remaining--;
+    }
+  }
+
+  *p = '\0'; // zakończ string
+}

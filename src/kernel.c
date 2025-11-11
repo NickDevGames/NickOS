@@ -49,13 +49,31 @@ void kernel_main(void) {
     if (fragmentCount > 0) {
       const char *cmd = fragments[0];
       if (strcmp(cmd, "echo") == 0) {
-        for (size_t i = 1; i < fragmentCount; i++) {
-          terminal_writestring(fragments[i]);
-          if (i == fragmentCount - 1)
-            terminal_writestring("\n");
-          else
-            terminal_writestring(" ");
+        char text[1024];
+
+        join_args(fragments, fragmentCount, text, sizeof(text));
+
+        char *parts[3];
+        size_t frags = split(text, '>', parts, 3);
+        if (frags > 1) {
+          if (frags == 2) {
+            DebugWriteString("overriding file ");
+            DebugWriteString(parts[1]);
+            DebugWriteString(" with: ");
+            DebugWriteString(parts[0]);
+            DebugWriteString("\n");
+          }
+          else if (frags == 3) {
+            DebugWriteString("appending file ");
+            DebugWriteString(parts[2]);
+            DebugWriteString(" with: ");
+            DebugWriteString(parts[0]);
+            DebugWriteString("\n");
+          }
         }
+
+        terminal_writestring(text);
+        terminal_writestring("\n");
       } else if (strcmp(cmd, "clear") == 0 || strcmp(cmd, "cls") == 0) {
         terminal_clear();
       } else if (strcmp(cmd, "help") == 0) {
