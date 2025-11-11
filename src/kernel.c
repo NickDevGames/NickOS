@@ -1,8 +1,9 @@
 #include "debug.c"
-#include "helpers.c"
 #include "disk.c"
+#include "helpers.c"
 #include "split.c"
 #include "term.c"
+#include <stdint.h>
 
 void kernel_main(void) {
   terminal_initialize();
@@ -65,8 +66,15 @@ void kernel_main(void) {
       } else if (strcmp(cmd, "dbgdisk") == 0) {
         uint16_t sector[256];
 
-        // Teraz `sector` zawiera pierwszy sektor (512 bajtów),
-        // np. MBR, boot sector itp.
+        ata_read_sector(0, sector);
+
+        for (size_t i = 0; i < 256; i++) {
+          sector[i] = swap_endian16(sector[i]);
+        }
+
+        uint8_t *sectorBytes = (uint8_t *)sector;
+
+        DebugWriteString((char *)sectorBytes);
       }
       // else{
       //   terminal_writestring("Command not found!\n");
