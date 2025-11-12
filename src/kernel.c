@@ -116,13 +116,8 @@ void kernel_main(void) {
         terminal_writestring("\n");
       } else if (strcmp(cmd, "poweroff") == 0 || strcmp(cmd, "shutdown") == 0) {
         poweroff();
-      } else if (strcmp(cmd, "install") == 0) {
-        terminal_writestring("Installing NickOS\n");
-        uint16_t buffer[1024 * 1];
-        
-        read_cdrom(0x170, false, 0, 1, buffer);
-
-        uint8_t *bufferBytes = (uint8_t *)buffer;
+      } else if (strcmp(cmd, "reboot") == 0) {
+        outb(0x64, 0xFE);
       } else {
         terminal_writestring("Command not found!\n");
       }
