@@ -5,7 +5,8 @@
 #include "term.c"
 #include <stdint.h>
 
-void kernel_main(void) {
+void kernel_main(void)
+{
   terminal_initialize();
   // terminal_writestring("Hello, kernel World!\r\n");
   DebugWriteString("Hello, world! From E9.\r\n");
@@ -13,7 +14,8 @@ void kernel_main(void) {
   terminal_writestring("Welcome to NickOS! Please login as live user "
                        "(\"liveuser\"). Password is \"1234\".\n\n");
 
-  while (true) {
+  while (true)
+  {
     terminal_writestring("NickOS login: ");
     char login[256];
     input_line(login, sizeof(login));
@@ -22,11 +24,13 @@ void kernel_main(void) {
     char password[256];
     input_line_pass(password, sizeof(password));
 
-    if (strcmp(login, "liveuser")) {
+    if (strcmp(login, "liveuser"))
+    {
       terminal_writestring("Wrong login!\n");
       continue;
     }
-    if (strcmp(password, "1234")) {
+    if (strcmp(password, "1234"))
+    {
       terminal_writestring("Wrong password!\n");
       continue;
     }
@@ -36,7 +40,8 @@ void kernel_main(void) {
     break;
   }
 
-  while (true) {
+  while (true)
+  {
     char line[1024];
 
     terminal_writestring("> ");
@@ -46,24 +51,29 @@ void kernel_main(void) {
     char *fragments[1024];
     int fragmentCount = split(line, ' ', fragments, 256);
 
-    if (fragmentCount > 0) {
+    if (fragmentCount > 0)
+    {
       const char *cmd = fragments[0];
-      if (strcmp(cmd, "echo") == 0) {
+      if (strcmp(cmd, "echo") == 0)
+      {
         char text[1024];
 
         join_args(fragments, fragmentCount, text, sizeof(text));
 
         char *parts[3];
         size_t frags = split(text, '>', parts, 3);
-        if (frags > 1) {
-          if (frags == 2) {
+        if (frags > 1)
+        {
+          if (frags == 2)
+          {
             DebugWriteString("overriding file ");
             DebugWriteString(parts[1]);
             DebugWriteString(" with: ");
             DebugWriteString(parts[0]);
             DebugWriteString("\n");
           }
-          else if (frags == 3) {
+          else if (frags == 3)
+          {
             DebugWriteString("appending file ");
             DebugWriteString(parts[2]);
             DebugWriteString(" with: ");
@@ -74,29 +84,64 @@ void kernel_main(void) {
 
         terminal_writestring(text);
         terminal_writestring("\n");
-      } else if (strcmp(cmd, "clear") == 0 || strcmp(cmd, "cls") == 0) {
+      }
+      else if (strcmp(cmd, "clear") == 0 || strcmp(cmd, "cls") == 0)
+      {
         terminal_clear();
-      } else if (strcmp(cmd, "help") == 0) {
+      }
+      else if (strcmp(cmd, "help") == 0)
+      {
         terminal_writestring(
             "All commands in NickOS:\nhelp - shows all commands\nclear - "
             "clears terminal\ncls - alias for clear\necho <text> - prints text "
             "given in <text> argument\n");
-      } else if (strcmp(cmd, "dbgdisk") == 0) {
+      }
+      else if (strcmp(cmd, "dbgdisk") == 0)
+      {
+        ata_identify_t ataid;
+
+        ata_identify(&ataid);
+
+        char buf[32];
+
+        itoa_bare(buf, sizeof(buf), ataid.sectors, 10);
+
+        terminal_writestring(buf);
+        terminal_writestring("\n");
+
         uint16_t sector[256];
 
         ata_read_sector(0, sector);
 
-        for (size_t i = 0; i < 256; i++) {
+        for (size_t i = 0; i < 256; i++)
+        {
           sector[i] = swap_endian16(sector[i]);
         }
 
         uint8_t *sectorBytes = (uint8_t *)sector;
 
         DebugWriteString((char *)sectorBytes);
+
+        sectorBytes[510] = 0xAA;
+        sectorBytes[511] = 0x55;
+
+        ata_write_sector(0, sectorBytes);
+
+        ata_read_sector(0, sector);
+
+        for (size_t i = 0; i < 256; i++)
+        {
+          sector[i] = swap_endian16(sector[i]);
+        }
+
+        sectorBytes = (uint8_t *)sector;
+
+        DebugWriteString((char *)sectorBytes);
       }
-      // else{
-      //   terminal_writestring("Command not found!\n");
-      // }
+      else
+      {
+        terminal_writestring("Command not found!\n");
+      }
     }
   }
 }
