@@ -1,8 +1,11 @@
+#include "cdrom.c"
 #include "debug.c"
 #include "disk.c"
-#include "helpers.c"
 #include "split.c"
 #include "term.c"
+#include "utils.c"
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 void kernel_main(void) {
@@ -38,19 +41,19 @@ void kernel_main(void) {
   }
 
   while (true) {
-    char line[1024];
+    char line[4096];
 
     terminal_writestring("> ");
 
     input_line(line, sizeof(line));
 
-    char *fragments[1024];
+    char *fragments[4096];
     int fragmentCount = split(line, ' ', fragments, 256);
 
     if (fragmentCount > 0) {
       const char *cmd = fragments[0];
       if (strcmp(cmd, "echo") == 0) {
-        char text[1024];
+        char text[4096];
 
         join_args(fragments, fragmentCount, text, sizeof(text));
 
@@ -87,19 +90,39 @@ void kernel_main(void) {
 
         ata_identify(&ataid);
 
-        char buf[32];
+        char nos[32];
+        itoa_bare(nos, sizeof(nos), ataid.sectors, 10);
 
-        itoa_bare(buf, sizeof(buf), ataid.sectors, 10);
+        char lss[32];
+        itoa_bare(lss, sizeof(lss), ataid.logical_sector_size, 10);
+
+        char pss[32];
+        itoa_bare(pss, sizeof(pss), ataid.sectors, 10);
 
         terminal_writestring("Number of sectors: ");
-        terminal_writestring(buf);
+        terminal_writestring(nos);
         terminal_writestring("\n");
 
         terminal_writestring("Disk model: ");
         terminal_writestring(ataid.model);
         terminal_writestring("\n");
+
+        terminal_writestring("Logical sector size in bytes: ");
+        terminal_writestring(lss);
+        terminal_writestring("\n");
+
+        terminal_writestring("Physical sector size in bytes: ");
+        terminal_writestring(pss);
+        terminal_writestring("\n");
       } else if (strcmp(cmd, "poweroff") == 0 || strcmp(cmd, "shutdown") == 0) {
         poweroff();
+      } else if (strcmp(cmd, "install") == 0) {
+        terminal_writestring("Installing NickOS\n");
+        uint16_t buffer[1024 * 1];
+        
+        read_cdrom(0x170, false, 0, 1, buffer);
+
+        uint8_t *bufferBytes = (uint8_t *)buffer;
       } else {
         terminal_writestring("Command not found!\n");
       }
