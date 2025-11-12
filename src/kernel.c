@@ -80,7 +80,8 @@ void kernel_main(void) {
         terminal_writestring(
             "All commands in NickOS:\nhelp - shows all commands\nclear - "
             "clears terminal\ncls - alias for clear\necho <text> - prints text "
-            "given in <text> argument\ndiskinfo - shows informations about ATA drive\n");
+            "given in <text> argument\ndiskinfo - shows informations about ATA "
+            "drive\n");
       } else if (strcmp(cmd, "diskinfo") == 0) {
         ata_identify_t ataid;
 
@@ -97,6 +98,8 @@ void kernel_main(void) {
         terminal_writestring("Disk model: ");
         terminal_writestring(ataid.model);
         terminal_writestring("\n");
+      } else if (strcmp(cmd, "poweroff") == 0 || strcmp(cmd, "shutdown") == 0) {
+        poweroff();
       } else {
         terminal_writestring("Command not found!\n");
       }

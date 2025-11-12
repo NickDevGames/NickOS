@@ -66,3 +66,13 @@ char scancode_to_ascii(uint8_t scancode, bool shift) {
     return mapShift[scancode];
   return map[scancode];
 }
+
+void poweroff() {
+    // QEMU/VMware/Bochs
+    outw(0x604, 0x2000);   // main method for QEMU and VMware
+    outb(0xF4, 0x00);      // fallback for older QEMU
+    outw(0xB004, 0x2000);  // fallback for Bochs/APM BIOS
+
+    // if all else fails — stop CPU
+    asm volatile("cli; hlt");
+}
