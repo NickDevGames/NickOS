@@ -96,7 +96,7 @@ void kernel_main(void)
             "clears terminal\ncls - alias for clear\necho <text> - prints text "
             "given in <text> argument\n");
       }
-      else if (strcmp(cmd, "dbgdisk") == 0)
+      else if (strcmp(cmd, "diskinfo") == 0)
       {
         ata_identify_t ataid;
 
@@ -105,38 +105,14 @@ void kernel_main(void)
         char buf[32];
 
         itoa_bare(buf, sizeof(buf), ataid.sectors, 10);
-
+      
+        terminal_writestring("Number of sectors: ");
         terminal_writestring(buf);
         terminal_writestring("\n");
 
-        uint16_t sector[256];
-
-        ata_read_sector(0, sector);
-
-        for (size_t i = 0; i < 256; i++)
-        {
-          sector[i] = swap_endian16(sector[i]);
-        }
-
-        uint8_t *sectorBytes = (uint8_t *)sector;
-
-        DebugWriteString((char *)sectorBytes);
-
-        sectorBytes[510] = 0xAA;
-        sectorBytes[511] = 0x55;
-
-        ata_write_sector(0, sectorBytes);
-
-        ata_read_sector(0, sector);
-
-        for (size_t i = 0; i < 256; i++)
-        {
-          sector[i] = swap_endian16(sector[i]);
-        }
-
-        sectorBytes = (uint8_t *)sector;
-
-        DebugWriteString((char *)sectorBytes);
+        terminal_writestring("Disk model: ");
+        terminal_writestring(ataid.model);
+        terminal_writestring("\n");
       }
       else
       {
