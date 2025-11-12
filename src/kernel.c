@@ -116,7 +116,7 @@ void kernel_main(void) {
         terminal_writestring("\n");
       } else if (strcmp(cmd, "poweroff") == 0 || strcmp(cmd, "shutdown") == 0) {
         poweroff();
-      } else if (strcmp(cmd, "reboot") == 0) {
+      } else if (strcmp(cmd, "reboot") == 0 || strcmp(cmd, "restart") == 0) {
         outb(0x64, 0xFE);
       } else {
         terminal_writestring("Command not found!\n");
