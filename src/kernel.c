@@ -59,14 +59,7 @@ void kernel_main(void) {
           terminal_writestring("\n");
         } else if (strcmp(cmd, "clear") == 0 || strcmp(cmd, "cls") == 0) {
           terminal_clear();
-        } else if (strcmp(cmd, "help") == 0) {
-          terminal_writestring(
-              "All commands in NickOS:\nhelp - shows all commands\nclear - "
-              "clears terminal\ncls - alias for clear\necho <text> - prints "
-              "text "
-              "given in <text> argument\ndiskinfo - shows informations about "
-              "ATA "
-              "drive\n");
+
         } else if (strcmp(cmd, "diskinfo") == 0) {
           ata_identify_t ataid;
 
@@ -107,10 +100,22 @@ void kernel_main(void) {
           terminal_writestring(
               "Welcome to NickOS 0.0.0 build 1!\nPlease login as live user "
               "(\"liveuser\"). Password is \"1234\".\n\n");
+        } else if (strcmp(cmd, "help") == 0) {
+          terminal_writestring(
+              "All commands in NickOS:\nhelp - shows all commands\nclear - "
+              "clears terminal\ncls - alias for clear\necho <text> - prints "
+              "text "
+              "given in <text> argument\ndiskinfo - shows informations about "
+              "ATA "
+              "drive\nreboot - restarts a system\nrestart - alias for "
+              "reboot\npoweroff - shutdowns a system\nshutdown - alias for "
+              "poweroff\nexit - logs out from system\nlogout - alias for "
+              "exit\n");
         } else {
           terminal_writestring("Command not found!\n");
         }
       }
+
     } else {
       terminal_writestring("NickOS login: ");
       char login[256];
