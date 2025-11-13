@@ -84,7 +84,7 @@ void kernel_main(void) {
             "All commands in NickOS:\nhelp - shows all commands\nclear - "
             "clears terminal\ncls - alias for clear\necho <text> - prints text "
             "given in <text> argument\ndiskinfo - shows informations about ATA "
-            "drive\n");
+            "drive\nreboot - restarts a system\nrestart - alias for reboot\npoweroff - shutdowns a system\nshutdown - alias for poweroff");
       } else if (strcmp(cmd, "diskinfo") == 0) {
         ata_identify_t ataid;
 
