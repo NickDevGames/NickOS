@@ -153,12 +153,12 @@ void input_line_pass(char *buffer, int max_len) {
 
     if (sc == 0x2A || sc == 0x36) {
       shift = true;
-      return;
+      continue;
     }
 
     if (sc == 0xAA || sc == 0xB6) {
       shift = false;
-      return;
+      continue;
     }
 
     // ignoruj klawisze puszczane (bit 7 ustawiony)
