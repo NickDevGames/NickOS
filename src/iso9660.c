@@ -307,15 +307,11 @@ void iso_list_by_path(const char *path) {
 
     uint32_t lba, size;
     if (!iso_open_path(path, root_lba, root_size, &lba, &size)) {
-        terminal_writestring("Sciezka nie istnieje: ");
+        terminal_writestring("Path doesn't exists: ");
         terminal_writestring(path);
         terminal_writestring("\n");
         return;
     }
-
-    terminal_writestring("Zawartosc ");
-    terminal_writestring(path);
-    terminal_writestring(":\n");
 
     iso_list_directory(lba, size);
 }

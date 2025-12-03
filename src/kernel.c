@@ -135,6 +135,11 @@ void kernel_main(void)
             terminal_writestring("/home\n");
             terminal_writestring("/cdrom\n");
           }
+          else if (fragments[1][0] == '/')
+          {
+            terminal_writestring("/home\n");
+            terminal_writestring("/cdrom\n");
+          }
           else
           {
             if (memcmp(fragments[1], "/cdrom/", 7) == 0 || memcmp(fragments[1], "/cdrom ", 7) == 0 || memcmp(fragments[1], "/cdrom\0", 7) == 0)
@@ -176,7 +181,7 @@ void kernel_main(void)
               "drive\nreboot - restarts a system\nrestart - alias for "
               "reboot\npoweroff - shutdowns a system\nshutdown - alias for "
               "poweroff\nexit - logs out from system\nlogout - alias for "
-              "exit\nlscd [path] - list files in CD-ROM. Default path is /\nls [path] - list files on HDD (FAT32). Default path is /\ncat <path> - read file content and display");
+              "exit\nls [path] - list files in given path (or root dir). Default path is /\ncat <path> - read file content and display");
         }
         else if (strcmp(cmd, "nickfetch") == 0)
         {
