@@ -76,11 +76,12 @@ void terminal_putchar(char c) {
     terminal_putentryat(' ', terminal_color, cursorPos);
   } else {
     terminal_putentryat(c, terminal_color, cursorPos);
-    if (++cursorPos.X == VGA_WIDTH) {
+    if (++cursorPos.X >= VGA_WIDTH) {
       cursorPos.X = 0;
-      if (++cursorPos.Y == VGA_HEIGHT)
-        cursorPos.Y = 0;
+      ++cursorPos.Y;
     }
+    if (cursorPos.Y >= VGA_HEIGHT)
+      cursorPos.Y = 0;
   }
 }
 
@@ -99,6 +100,51 @@ void terminal_write(const char *data, size_t size) {
 
 void terminal_writestring(const char *data) {
   terminal_write(data, strlen(data));
+}
+
+void terminal_write_format(const char *data, size_t size) {
+  static enum TextModeColors fg = VGA_COLOR_LIGHT_GREY;
+  static enum TextModeColors bg = VGA_COLOR_BLACK;
+
+  // Ustaw domyślny kolor na start
+  terminal_color = vga_entry_color(fg, bg);
+
+  for (size_t i = 0; i < size; i++) {
+    char c = data[i];
+
+    if ((c == '$' || c == '&') && i + 1 < size) {
+      char next = data[++i];
+
+      // Zamień hex (0–9, A–F, a–f) na liczbę
+      uint8_t color;
+      if (next >= '0' && next <= '9')
+        color = next - '0';
+      else if (next >= 'A' && next <= 'F')
+        color = next - 'A' + 10;
+      else if (next >= 'a' && next <= 'f')
+        color = next - 'a' + 10;
+      else
+        continue; // nieprawidłowy znak — pomiń
+
+      if (c == '$')
+        fg = color;
+      else
+        bg = color;
+
+      terminal_color = vga_entry_color(fg, bg);
+      continue;
+    }
+
+    // <-- Kluczowy punkt:
+    // Funkcja terminal_putchar MUSI używać terminal_color
+    terminal_putchar(c);
+  }
+
+  terminal_refresh_cursor();
+}
+
+void terminal_writestring_format(const char *data) {
+  terminal_write_format(data, strlen(data));
 }
 
 bool shift = false;
