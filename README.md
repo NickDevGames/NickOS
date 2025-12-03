@@ -92,5 +92,5 @@ You can adjust memory size, debug options, or additional drives as needed.
     - [x] `exit`/`logout` command
     - [x] `ls` command
     - [x] `cat` command
-    - [] `cd` command
-- [] Implement ISO 9660 file system
+    - [ ] `cd` command
+- [ ] Implement ISO 9660 file system
