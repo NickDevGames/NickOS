@@ -262,10 +262,10 @@ void atapi_read_sector(uint32_t lba, uint16_t *buffer)
   atapi_wait_ready(); // wait for BSY=0 and DRQ=0
 
   // 2. Set transfer size = 2048 bytes (typowy rozmiar sektora CD-ROM)
-  outb(0x172, 0); // sector count = 0
+  outb(0x172, 0);           // sector count = 0
   outb(0x173, 2048 & 0xFF); // transfer size low byte
-  outb(0x174, 2048 >> 8); // transfer size high byte
-  outb(0x175, 0); // always 0
+  outb(0x174, 2048 >> 8);   // transfer size high byte
+  outb(0x175, 0);           // always 0
 
   // 3. Send PACKET command (0xA0)
   outb(0x177, 0xA0);
@@ -305,55 +305,49 @@ void atapi_read_sector(uint32_t lba, uint16_t *buffer)
 
 uint32_t atapi_get_disc_size()
 {
-    uint8_t packet[12] = {0};
-    packet[0] = 0x25; // READ CAPACITY (10)
+  uint8_t packet[12] = {0};
+  packet[0] = 0x25; // READ CAPACITY (10)
 
-    // 1. select secondary ATAPI (usually slave)
-    outb(0x176, 0xA0);  // 0xA0 = device 0, 0xB0 = device 1
-    atapi_wait_ready();
+  // 1. select secondary ATAPI (usually slave)
+  outb(0x176, 0xA0); // 0xA0 = device 0, 0xB0 = device 1
+  atapi_wait_ready();
 
-    // 2. Transfer 8 bytes (READ CAPACITY always returns 8)
-    outb(0x172, 0);  // sector count = 0
-    outb(0x173, 8);  // LBA low = size
-    outb(0x174, 0);
-    outb(0x175, 0);
+  // 2. Transfer 8 bytes (READ CAPACITY always returns 8)
+  outb(0x172, 0); // sector count = 0
+  outb(0x173, 8); // LBA low = size
+  outb(0x174, 0);
+  outb(0x175, 0);
 
-    // 3. Send PACKET command 0xA0
-    outb(0x177, 0xA0);
-    atapi_wait_drq();
+  // 3. Send PACKET command 0xA0
+  outb(0x177, 0xA0);
+  atapi_wait_drq();
 
-    // 4. Send packet (6 words, big-endian inside words)
-    for (int i = 0; i < 6; i++)
-    {
-        uint16_t w = ((uint16_t)packet[i*2] << 8) | packet[i*2 + 1];
-        outw(0x170, w);
-    }
+  // 4. Send packet (6 words, big-endian inside words)
+  for (int i = 0; i < 6; i++)
+  {
+    uint16_t w = ((uint16_t)packet[i * 2] << 8) | packet[i * 2 + 1];
+    outw(0x170, w);
+  }
 
-    atapi_wait_drq();
+  atapi_wait_drq();
 
-    // 5. Read 4 words = 8 bytes
-    uint8_t buf[8];
-    for (int i = 0; i < 4; i++)
-    {
-        uint16_t w = inw(0x170);
-        buf[i*2]     = (w >> 8) & 0xFF;
-        buf[i*2 + 1] = (w     ) & 0xFF;
-    }
+  // 5. Read 4 words = 8 bytes
+  uint8_t buf[8];
+  for (int i = 0; i < 4; i++)
+  {
+    uint16_t w = inw(0x170);
+    buf[i * 2] = (w >> 8) & 0xFF;
+    buf[i * 2 + 1] = (w) & 0xFF;
+  }
 
-    // Unpack: bytes 0–3 = max LBA (big endian)
-    uint32_t max_lba =
-          ((uint32_t)buf[0] << 24)
-        | ((uint32_t)buf[1] << 16)
-        | ((uint32_t)buf[2] <<  8)
-        | ((uint32_t)buf[3]);
+  // Unpack: bytes 0–3 = max LBA (big endian)
+  uint32_t max_lba =
+      ((uint32_t)buf[0] << 24) | ((uint32_t)buf[1] << 16) | ((uint32_t)buf[2] << 8) | ((uint32_t)buf[3]);
 
-    // bytes 4–7 = block size (should be 2048)
-    uint32_t block_size =
-          ((uint32_t)buf[4] << 24)
-        | ((uint32_t)buf[5] << 16)
-        | ((uint32_t)buf[6] <<  8)
-        | ((uint32_t)buf[7]);
+  // bytes 4–7 = block size (should be 2048)
+  uint32_t block_size =
+      ((uint32_t)buf[4] << 24) | ((uint32_t)buf[5] << 16) | ((uint32_t)buf[6] << 8) | ((uint32_t)buf[7]);
 
-    // total disc size in bytes
-    return (max_lba + 1) * block_size;
+  // total disc size in bytes
+  return (max_lba + 1) * block_size;
 }

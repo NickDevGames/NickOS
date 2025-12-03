@@ -75,14 +75,6 @@ uint32_t sectors_per_cluster;
 
 uint32_t fat_start_lba;
 
-static void memcpy_c(void *dst, const void *src, int n)
-{
-    char *d = (char *)dst;
-    const char *s = (const char *)src;
-    while (n--)
-        *d++ = *s++;
-}
-
 void fat32_init(uint32_t lba)
 {
     fat_start_lba = lba;

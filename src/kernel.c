@@ -113,13 +113,13 @@ void kernel_main(void)
           // terminal_writestring(cdsize);
           // terminal_writestring(" sectors\n");
         }
-        else if (strcmp(cmd, "lscd") == 0)
-        {
-          if (fragmentCount <= 1)
-            iso_list_by_path("/");
-          else
-            iso_list_by_path(fragments[1]);
-        }
+        // else if (strcmp(cmd, "lscd") == 0)
+        // {
+        //   if (fragmentCount <= 1)
+        //     iso_list_by_path("/");
+        //   else
+        //     iso_list_by_path(fragments[1]);
+        // }
         else if (strcmp(cmd, "cat") == 0)
         {
           if (fragmentCount == 1)
@@ -131,9 +131,22 @@ void kernel_main(void)
         else if (strcmp(cmd, "ls") == 0)
         {
           if (fragmentCount <= 1)
-            fat32_ls_path("/"); // komenda "ls" root dir
+          {
+            terminal_writestring("/home\n");
+            terminal_writestring("/cdrom\n");
+          }
           else
-            fat32_ls_path(fragments[1]);
+          {
+            if (memcmp(fragments[1], "/cdrom/", 7) == 0 || memcmp(fragments[1], "/cdrom ", 7) == 0 || memcmp(fragments[1], "/cdrom\0", 7) == 0)
+            {
+              iso_list_by_path(fragments[1] + 6);
+            }
+            else if (memcmp(fragments[1], "/home/", 7) == 0 || memcmp(fragments[1], "/home ", 7) == 0 || memcmp(fragments[1], "/home\0", 6) == 0)
+            {
+              fat32_ls_path(fragments[1] + 5);
+            }
+          }
+          fat32_ls_path(fragments[1]);
         }
         else if (strcmp(cmd, "poweroff") == 0 ||
                  strcmp(cmd, "shutdown") == 0)
