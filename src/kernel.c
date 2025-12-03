@@ -63,6 +63,7 @@ void kernel_main(void)
               DebugWriteString(" with: ");
               DebugWriteString(parts[0]);
               DebugWriteString("\n");
+              fat32_write_file_by_path(parts[1], parts[0], strlen(parts[0]), FAT32_WRITE_OVERWRITE);
             }
             else if (frags == 3)
             {
@@ -71,6 +72,7 @@ void kernel_main(void)
               DebugWriteString(" with: ");
               DebugWriteString(parts[0]);
               DebugWriteString("\n");
+              fat32_write_file_by_path(parts[2], parts[0], strlen(parts[0]), FAT32_WRITE_APPEND);
             }
           }
 
