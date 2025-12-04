@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "memory.c"
 
 #define SECTOR_SIZE 2048
 
@@ -314,4 +315,37 @@ void iso_list_by_path(const char *path) {
     }
 
     iso_list_directory(lba, size);
+}
+
+// Prototyp funkcji do odczytu pojedynczego sektora (2048 bajtów)
+void atapi_read_sector(uint32_t lba, uint16_t *buffer);
+
+uint8_t* atapi_read_file(uint32_t start_lba, uint32_t sectors_count)
+{
+    if (sectors_count == 0)
+        return NULL;
+
+    // Alokujemy bufor na całą zawartość pliku (2048 * sectors_count bajtów)
+    uint8_t *file_data = (uint8_t*)malloc(sectors_count * 2048);
+    if (!file_data)
+        return NULL; // błąd alokacji
+
+    // Bufor pośredni do odczytu sektora jako 16-bitowych słów
+    uint16_t sector_buffer[1024];
+
+    for (uint32_t i = 0; i < sectors_count; i++)
+    {
+        atapi_read_sector(start_lba + i, sector_buffer);
+
+        // Kopiujemy sektor z sector_buffer (uint16_t) do file_data (uint8_t)
+        // ATAPI zwraca dane w little endian 16-bit - a my chcemy ciąg bajtów
+        for (int j = 0; j < 1024; j++)
+        {
+            // Little endian 16-bit: niska pozycja = młodszy bajt
+            file_data[i * 2048 + j * 2]     = sector_buffer[j] & 0xFF;
+            file_data[i * 2048 + j * 2 + 1] = (sector_buffer[j] >> 8) & 0xFF;
+        }
+    }
+
+    return file_data;
 }

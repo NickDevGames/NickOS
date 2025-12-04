@@ -13,12 +13,14 @@
 #include "utils.c"
 #include "iso9660.c"
 #include "fat32.c"
+#include "memory.c"
 #include "apps/nickfetch.c"
 
 bool logged;
 
 void kernel_main(void)
 {
+  init_heap();
   terminal_initialize();
   // terminal_writestring("Hello, kernel World!\r\n");
 
@@ -122,11 +124,21 @@ void kernel_main(void)
         // }
         else if (strcmp(cmd, "cat") == 0)
         {
+
           if (fragmentCount == 1)
           {
           }
           else
-            cmd_cat(fragments[1]);
+          {
+            if (memcmp(fragments[1], "/cdrom/", 7) == 0 || memcmp(fragments[1], "/cdrom ", 7) == 0 || memcmp(fragments[1], "/cdrom\0", 7) == 0)
+            {
+              // atapi_read_file()
+            }
+            else if (memcmp(fragments[1], "/home/", 6) == 0 || memcmp(fragments[1], "/home ", 6) == 0 || memcmp(fragments[1], "/home\0", 6) == 0)
+            {
+              cmd_cat(fragments[1] + 5);
+            }
+          }
         }
         else if (strcmp(cmd, "ls") == 0)
         {
